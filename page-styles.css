@@ -1,0 +1,300 @@
+/* ============================================================
+   QT9 Site Page Styles - Professional Services Mockup
+   ============================================================ */
+
+/* Reset and Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #0b1220;
+  background: #ffffff;
+  line-height: 1.6;
+}
+
+/* Header */
+.qt9-site-header {
+  background: #ffffff;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(2, 8, 23, 0.04);
+}
+
+.qt9-header-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.qt9-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+}
+
+.qt9-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-weight: 700;
+  font-size: 24px;
+  color: #0b1f3b;
+}
+
+.qt9-logo-text {
+  color: #1c5fd4;
+}
+
+.qt9-logo-subtext {
+  font-size: 18px;
+  font-weight: 500;
+  color: #0b1f3b;
+}
+
+.qt9-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.qt9-phone {
+  font-size: 14px;
+  color: rgba(11, 18, 32, 0.7);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 200ms ease;
+}
+
+.qt9-phone:hover {
+  color: #1c5fd4;
+}
+
+.qt9-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.qt9-btn-primary {
+  background: #1c5fd4;
+  color: #ffffff;
+  border-color: #1c5fd4;
+}
+
+.qt9-btn-primary:hover {
+  background: #1554c0;
+  border-color: #1554c0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(28, 95, 212, 0.3);
+}
+
+.qt9-btn-secondary {
+  background: transparent;
+  color: #1c5fd4;
+  border-color: #1c5fd4;
+}
+
+.qt9-btn-secondary:hover {
+  background: rgba(28, 95, 212, 0.08);
+}
+
+.qt9-btn-outline {
+  background: transparent;
+  color: #0b1220;
+  border-color: rgba(15, 23, 42, 0.2);
+}
+
+.qt9-btn-outline:hover {
+  background: rgba(15, 23, 42, 0.04);
+  border-color: rgba(15, 23, 42, 0.3);
+}
+
+/* Main Navigation */
+.qt9-main-nav {
+  display: flex;
+  gap: 32px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.qt9-nav-item {
+  font-size: 14px;
+  color: rgba(11, 18, 32, 0.75);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 200ms ease;
+  padding: 8px 0;
+}
+
+.qt9-nav-item:hover {
+  color: #1c5fd4;
+}
+
+/* Sub Navigation */
+.qt9-sub-nav {
+  background: rgba(15, 23, 42, 0.02);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.qt9-sub-nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+}
+
+.qt9-sub-nav-item {
+  font-size: 14px;
+  color: rgba(11, 18, 32, 0.65);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 16px 0;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 200ms ease;
+}
+
+.qt9-sub-nav-item:hover {
+  color: #1c5fd4;
+}
+
+.qt9-sub-nav-item-active {
+  color: #1c5fd4;
+  border-bottom-color: #1c5fd4;
+}
+
+/* Main Content */
+.qt9-main-content {
+  min-height: calc(100vh - 200px);
+}
+
+/* Hero Section */
+.qt9-hero {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+  padding: 60px 0 80px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.qt9-hero-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.qt9-hero-title {
+  font-size: 48px;
+  font-weight: 700;
+  color: #0b1220;
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.qt9-hero-subtitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1c5fd4;
+  margin-bottom: 24px;
+}
+
+.qt9-hero-description {
+  font-size: 18px;
+  color: rgba(11, 18, 32, 0.7);
+  max-width: 800px;
+  margin: 0 auto 32px;
+  line-height: 1.7;
+}
+
+.qt9-hero-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Timeline Section */
+.qt9-timeline-section {
+  padding: 80px 0;
+  background: #ffffff;
+}
+
+.qt9-section-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Override page-wrap for embedded card */
+.qt9-timeline-section .qt9-page-wrap {
+  padding-top: 0;
+  padding-bottom: 200px;
+  justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .qt9-hero-title {
+    font-size: 36px;
+  }
+
+  .qt9-hero-subtitle {
+    font-size: 20px;
+  }
+
+  .qt9-hero-description {
+    font-size: 16px;
+  }
+
+  .qt9-header-actions {
+    gap: 12px;
+  }
+
+  .qt9-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .qt9-phone {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .qt9-main-nav {
+    gap: 20px;
+    overflow-x: auto;
+  }
+
+  .qt9-sub-nav-container {
+    gap: 16px;
+  }
+
+  .qt9-hero-title {
+    font-size: 32px;
+  }
+
+  .qt9-hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .qt9-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
