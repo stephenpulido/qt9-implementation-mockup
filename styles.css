@@ -207,6 +207,7 @@
   grid-template-columns: repeat(var(--weeks), 1fr);
   border-bottom: 1px solid var(--line);
   padding-bottom: 6px;
+  position: relative;
 }
 
 .qt9-tick {
@@ -248,6 +249,7 @@
   isolation: isolate;
   cursor: crosshair;
 }
+
 
 .qt9-row {
   display: grid;

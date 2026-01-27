@@ -345,9 +345,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const getBounds = () => {
     const rect = card.getBoundingClientRect();
+    const axis = card.querySelector(".qt9-axis");
+    const bars = card.querySelector(".qt9-bars");
     const minX = pad + labelCol + colGap;
     const maxX = rect.width - pad;
-    return { rect, minX, maxX };
+    let minY = 0;
+    let maxY = rect.height;
+    
+    // Calculate vertical bounds: from top of axis to bottom of bars
+    if (axis && bars) {
+      const axisRect = axis.getBoundingClientRect();
+      const barsRect = bars.getBoundingClientRect();
+      minY = axisRect.top - rect.top;
+      maxY = barsRect.bottom - rect.top;
+    }
+    
+    return { rect, minX, maxX, minY, maxY };
   };
 
   // ===== Tab Switching =====
@@ -716,11 +729,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     hoverRafId = requestAnimationFrame(() => {
       hoverRafId = null;
-      const { rect, minX, maxX } = getBounds();
+      const { rect, minX, maxX, minY, maxY } = getBounds();
       const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
 
-      // Only process if mouse is over the timeline area (not label column)
-      if (x < minX || x > maxX) {
+      // Only process if mouse is over the timeline area (not label column, and within vertical bounds)
+      if (x < minX || x > maxX || y < minY || y > maxY) {
         if (expandedLane) {
           expandedLane.classList.remove("expanded");
           expandedLane = null;
@@ -823,10 +837,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initial attachment of subtask handlers
   attachSubtasksHandlers();
 
-  // Listen to mousemove on the bars container
-  const barsContainer = card.querySelector(".qt9-bars");
-  if (barsContainer) {
-    barsContainer.addEventListener("mousemove", handleMouseMove);
-    card.addEventListener("mouseleave", handleMouseLeave);
-  }
+  // Listen to mousemove on the card (to include axis and bars areas)
+  card.addEventListener("mousemove", handleMouseMove);
+  card.addEventListener("mouseleave", handleMouseLeave);
 });
