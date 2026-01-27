@@ -802,6 +802,11 @@ body {
   align-items: flex-start;
 }
 
+.qt9-timeline-section .qt9-timeline-card {
+  width: 100%;
+  max-width: 100%;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .qt9-hero-title {
@@ -927,6 +932,11 @@ body {
   
   .qt9-timeline-section {
     margin-top: 32px;
+  }
+
+  .qt9-timeline-section .qt9-timeline-card {
+    width: 100%;
+    max-width: 100%;
   }
 
   .qt9-proof-grid {
