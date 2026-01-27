@@ -186,7 +186,7 @@ body {
 /* Hero Section */
 .qt9-hero {
   background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
-  padding: 60px 0 80px;
+  padding: 40px 0 50px;
   border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
@@ -218,6 +218,10 @@ body {
   max-width: 800px;
   margin: 0 auto 32px;
   line-height: 1.7;
+}
+
+.qt9-hero-title {
+  margin-bottom: 24px;
 }
 
 .qt9-hero-actions {
@@ -393,90 +397,59 @@ body {
   line-height: 1.6;
 }
 
-/* Portfolio Metrics */
-.qt9-portfolio-metrics {
-  margin-top: 48px;
-  text-align: center;
-}
-
-.qt9-portfolio-stat {
-  margin-bottom: 40px;
-}
-
-.qt9-stat-number {
-  font-size: 48px;
-  font-weight: 700;
-  color: #1c5fd4;
-  margin-bottom: 8px;
-}
-
-.qt9-stat-label {
-  font-size: 16px;
-  color: rgba(11, 18, 32, 0.7);
-  font-weight: 500;
-}
-
-.qt9-portfolio-breakdown {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  margin-bottom: 48px;
-}
-
-.qt9-breakdown-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  background: #ffffff;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 8px;
-}
-
-.qt9-breakdown-label {
-  font-size: 14px;
-  color: rgba(11, 18, 32, 0.6);
-  margin-bottom: 8px;
-}
-
-.qt9-breakdown-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: #0b1220;
-}
-
-.qt9-portfolio-details {
+/* Implementation Features */
+.qt9-implementation-features {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   margin-top: 48px;
 }
 
-.qt9-portfolio-detail {
+.qt9-feature-item {
   background: #ffffff;
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 12px;
   padding: 24px;
+  box-shadow: 0 2px 8px rgba(2, 8, 23, 0.04);
 }
 
-.qt9-detail-title {
-  font-size: 18px;
+.qt9-feature-title {
+  font-size: 20px;
   font-weight: 600;
   color: #0b1220;
   margin-bottom: 16px;
+  line-height: 1.3;
 }
 
-.qt9-detail-list {
+.qt9-feature-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.qt9-detail-list li {
+.qt9-feature-list li {
   font-size: 14px;
   color: rgba(11, 18, 32, 0.7);
-  line-height: 1.8;
-  margin-bottom: 8px;
+  line-height: 1.7;
+  margin-bottom: 12px;
+  padding-left: 20px;
+  position: relative;
+}
+
+.qt9-feature-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #1c5fd4;
+  font-weight: bold;
+}
+
+.qt9-feature-list li:last-child {
+  margin-bottom: 0;
+}
+
+.qt9-note-trophy {
+  margin-top: 48px;
 }
 
 /* Benchmark */
@@ -585,6 +558,7 @@ body {
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
   margin-top: 48px;
+  margin-bottom: 60px;
   position: relative;
 }
 
@@ -592,36 +566,36 @@ body {
   background: #ffffff;
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 12px;
-  padding: 32px 24px;
+  padding: 20px 24px;
   text-align: center;
   position: relative;
 }
 
 .qt9-step-number {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: #1c5fd4;
   color: #ffffff;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 16px;
+  margin: 0 auto 12px;
 }
 
 .qt9-step-title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   color: #0b1220;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .qt9-step-description {
-  font-size: 14px;
+  font-size: 13px;
   color: rgba(11, 18, 32, 0.7);
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 /* Benefits */
@@ -805,15 +779,24 @@ body {
 
 /* Timeline Section */
 .qt9-timeline-section {
-  padding: 80px 0;
-  background: #ffffff;
+  padding: 0;
+  background: transparent;
+  margin-top: 60px;
 }
 
 /* Override page-wrap for embedded card */
+.qt9-timeline-section .qt9-section-container {
+  padding: 0;
+}
+
 .qt9-timeline-section .qt9-page-wrap {
   padding-top: 0;
-  padding-bottom: 200px;
+  padding-bottom: 0;
+  min-height: auto;
+  height: auto;
   justify-content: center;
+  display: flex;
+  align-items: flex-start;
 }
 
 /* Responsive */
@@ -855,11 +838,7 @@ body {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .qt9-portfolio-breakdown {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .qt9-portfolio-details {
+  .qt9-implementation-features {
     grid-template-columns: 1fr;
   }
 
@@ -929,16 +908,22 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .qt9-portfolio-breakdown {
+  .qt9-implementation-features {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
-  .qt9-stat-number {
-    font-size: 36px;
+  .qt9-feature-item {
+    padding: 20px;
   }
 
   .qt9-journey {
     grid-template-columns: 1fr;
+    margin-bottom: 32px;
+  }
+  
+  .qt9-timeline-section {
+    margin-top: 32px;
   }
 
   .qt9-proof-grid {

@@ -1,6 +1,39 @@
 /* ============================================================
    QT9 Bento Gantt Mock Timeline
    ============================================================ */
+
+/* Simple Header for Navigation */
+.qt9-simple-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  padding: 16px 24px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom-left-radius: 8px;
+  box-shadow: 0 2px 8px rgba(2, 8, 23, 0.08);
+}
+
+.qt9-implementation-link {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #1c5fd4;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  transition: all 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.qt9-implementation-link:hover {
+  background: #1554c0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(28, 95, 212, 0.3);
+}
+
 .qt9-page-wrap {
   display: flex;
   justify-content: center;
