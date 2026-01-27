@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Timeline Bento Demo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="page__header">
+        <div>
+          <p class="eyebrow">Project Atlas</p>
+          <h1>Delivery timeline</h1>
+          <p class="subtitle">
+            A single-page Bento layout with SVG guides and layered DOM cards.
+          </p>
+        </div>
+        <div class="status">
+          <span class="status__dot" aria-hidden="true"></span>
+          <span class="status__text">Demo only</span>
+        </div>
+      </header>
+
+      <main class="bento">
+        <section class="bento__canvas" aria-hidden="true">
+          <svg
+            class="timeline-svg"
+            viewBox="0 0 1200 600"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient id="glow" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%" stop-color="#5fd0ff" stop-opacity="0.8" />
+                <stop offset="100%" stop-color="#8f7bff" stop-opacity="0.3" />
+              </linearGradient>
+              <filter id="soft-blur" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="10" />
+              </filter>
+            </defs>
+            <path
+              class="timeline-svg__path"
+              d="M 80 120 C 320 60, 520 200, 720 160 S 1080 200, 1120 340"
+            />
+            <path
+              class="timeline-svg__path timeline-svg__path--secondary"
+              d="M 120 320 C 360 260, 520 420, 760 380 S 1080 420, 1120 520"
+            />
+            <circle class="timeline-svg__node" cx="120" cy="120" r="10" />
+            <circle class="timeline-svg__node" cx="420" cy="160" r="8" />
+            <circle class="timeline-svg__node" cx="720" cy="180" r="9" />
+            <circle class="timeline-svg__node" cx="1080" cy="250" r="10" />
+            <circle class="timeline-svg__node" cx="180" cy="320" r="9" />
+            <circle class="timeline-svg__node" cx="520" cy="370" r="8" />
+            <circle class="timeline-svg__node" cx="840" cy="400" r="9" />
+            <circle class="timeline-svg__node" cx="1080" cy="470" r="10" />
+            <rect
+              class="timeline-svg__glow"
+              x="0"
+              y="0"
+              width="1200"
+              height="600"
+            />
+          </svg>
+        </section>
+
+        <section class="bento__cards" aria-label="Timeline snapshots">
+          <article class="card card--wide">
+            <header class="card__header">
+              <h2>Discovery sprint</h2>
+              <span class="pill pill--blue">Week 1-2</span>
+            </header>
+            <p class="card__body">
+              Stakeholder interviews, user journey mapping, and a quick viability
+              checkpoint.
+            </p>
+            <div class="card__footer">
+              <span class="chip">7 workshops</span>
+              <span class="chip">12 interviews</span>
+              <span class="chip">Risk log</span>
+            </div>
+          </article>
+
+          <article class="card">
+            <header class="card__header">
+              <h2>Design system</h2>
+              <span class="pill pill--purple">Week 3</span>
+            </header>
+            <p class="card__body">
+              Tokenized colors, typography scale, and a starter component set.
+            </p>
+            <div class="card__footer">
+              <span class="chip">12 components</span>
+              <span class="chip">2 themes</span>
+            </div>
+          </article>
+
+          <article class="card">
+            <header class="card__header">
+              <h2>Prototype build</h2>
+              <span class="pill pill--green">Week 4</span>
+            </header>
+            <p class="card__body">
+              Interactive prototype focused on core flows and timeline visuals.
+            </p>
+            <div class="card__footer">
+              <span class="chip">Figma + HTML</span>
+              <span class="chip">Usability test</span>
+            </div>
+          </article>
+
+          <article class="card card--tall">
+            <header class="card__header">
+              <h2>Execution lanes</h2>
+              <span class="pill pill--amber">Week 5-8</span>
+            </header>
+            <p class="card__body">
+              Parallel workstreams with weekly integration, QA, and stakeholder
+              reviews.
+            </p>
+            <div class="card__progress">
+              <div class="card__progress-bar">
+                <span data-width="68%"></span>
+              </div>
+              <span class="card__progress-label">68% complete</span>
+            </div>
+          </article>
+
+          <article class="card">
+            <header class="card__header">
+              <h2>Launch prep</h2>
+              <span class="pill pill--pink">Week 9</span>
+            </header>
+            <p class="card__body">
+              Release runbook, onboarding assets, and executive demo rehearsal.
+            </p>
+            <div class="card__footer">
+              <span class="chip">Checklist</span>
+              <span class="chip">Training</span>
+            </div>
+          </article>
+
+          <article class="card">
+            <header class="card__header">
+              <h2>Post-launch</h2>
+              <span class="pill pill--gray">Week 10</span>
+            </header>
+            <p class="card__body">
+              Measure adoption, capture improvements, and plan iteration 2.0.
+            </p>
+            <div class="card__footer">
+              <span class="chip">Survey</span>
+              <span class="chip">Retro</span>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="main.js"></script>
+  </body>
+</html>
