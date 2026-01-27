@@ -166,6 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "FSMA compliance mapping",
         "Food safety team formation",
         "Supplier qualification criteria",
+        "Ingredient specification review",
       ],
       phase2: [
         ...defaultTasks.phase2,
@@ -174,6 +175,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "Temperature monitoring",
         "Lot traceability setup",
         "Sanitation scheduling",
+        "Batch record management",
+        "Expiration date tracking",
       ],
       phase3: [
         ...defaultTasks.phase3,
@@ -181,6 +184,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "SQF/GFSI prep",
         "Crisis management prep",
         "Supplier verification training",
+        "Food safety documentation",
+        "Label compliance training",
       ],
       phase4: [
         ...defaultTasks.phase4,
@@ -188,6 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Recall readiness",
         "Regulatory compliance monitoring",
         "Environmental monitoring setup",
+        "Food safety certification prep",
       ],
     },
   };
@@ -304,6 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     food: {
       name: "Food",
+      description: "Food manufacturing implementation emphasizes FSMA compliance, HACCP plan integration, and comprehensive allergen management. This implementation ensures full lot traceability, temperature monitoring, recall readiness, and SQF/GFSI audit preparation for food safety certification.",
       maxWeeks: 24,
       phases: [
         {
@@ -396,7 +403,8 @@ document.addEventListener("DOMContentLoaded", () => {
       for (let i = 1; i <= weeks; i++) {
         const tick = document.createElement("div");
         tick.className = "qt9-tick";
-        tick.innerHTML = `<span>${i}</span>`;
+        // Only show number for even weeks, but keep all tick marks visible
+        tick.innerHTML = (i % 2 === 0) ? `<span>${i}</span>` : `<span></span>`;
         ticksContainer.appendChild(tick);
       }
     }
