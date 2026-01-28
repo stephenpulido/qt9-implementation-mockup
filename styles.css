@@ -557,3 +557,31 @@
     font-size: 9px;
   }
 }
+
+@media (max-width: 640px) {
+  .qt9-timeline-card {
+    --label-col: 0px;
+    --col-gap: 0px;
+  }
+
+  .qt9-axis {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+  }
+
+  .qt9-axis-spacer {
+    height: auto;
+  }
+
+  .qt9-row {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+    align-items: start;
+  }
+
+  .qt9-label {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
