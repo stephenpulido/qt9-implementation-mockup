@@ -338,29 +338,24 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // ===== Setup helper functions first =====
-  const css = getComputedStyle(card);
-  const labelCol = parseFloat(css.getPropertyValue("--label-col")) || 170;
-  const colGap = parseFloat(css.getPropertyValue("--col-gap")) || 12;
-  const pad = parseFloat(css.getPropertyValue("--card-pad")) || 18;
-
+  // Read CSS variables dynamically on each call to handle responsive changes
   const getBounds = () => {
+    const css = getComputedStyle(card);
+    const labelCol = parseFloat(css.getPropertyValue("--label-col")) || 170;
+    const colGap = parseFloat(css.getPropertyValue("--col-gap")) || 12;
+    const pad = parseFloat(css.getPropertyValue("--card-pad")) || 18;
+    
     const rect = card.getBoundingClientRect();
-    const axis = card.querySelector(".qt9-axis");
-    const bars = card.querySelector(".qt9-bars");
-    const minX = pad + labelCol + colGap;
+    
+    // Check if we're at the smallest breakpoint where rows stack vertically
+    // At this breakpoint, label-col is 0px and timeline expands to full width
+    const isStackedLayout = labelCol === 0 || (labelCol < 50 && colGap === 0);
+    
+    // At smallest breakpoint, timeline expands to full width (no label column)
+    const minX = isStackedLayout ? pad : pad + labelCol + colGap;
     const maxX = rect.width - pad;
-    let minY = 0;
-    let maxY = rect.height;
     
-    // Calculate vertical bounds: from top of axis to bottom of bars
-    if (axis && bars) {
-      const axisRect = axis.getBoundingClientRect();
-      const barsRect = bars.getBoundingClientRect();
-      minY = axisRect.top - rect.top;
-      maxY = barsRect.bottom - rect.top;
-    }
-    
-    return { rect, minX, maxX, minY, maxY };
+    return { rect, minX, maxX, labelCol, colGap, pad };
   };
 
   // ===== Tab Switching =====
@@ -508,46 +503,11 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // ===== Attach subtask hover handlers =====
+  // Note: Expansion is now controlled solely by X-coordinate (week position)
+  // This function is kept for potential future use but doesn't interfere with scrubbing
   let subtaskHandlersAttached = false;
   const attachSubtasksHandlers = () => {
-    // Use event delegation on the bars container to avoid reattachment issues
-    if (subtaskHandlersAttached) return;
-    
-    const barsContainer = card.querySelector(".qt9-bars");
-    if (!barsContainer) return;
-
-    barsContainer.addEventListener("mouseenter", (e) => {
-      const subtasksContainer = e.target.closest(".qt9-subtasks");
-      if (subtasksContainer) {
-        const lane = subtasksContainer.closest(".qt9-lane");
-        if (lane) {
-          lane.classList.add("expanded");
-          expandedLane = lane;
-        }
-      }
-    }, true);
-
-    barsContainer.addEventListener("mouseleave", (e) => {
-      const subtasksContainer = e.target.closest(".qt9-subtasks");
-      if (subtasksContainer) {
-        const relatedTarget = e.relatedTarget;
-        const lane = subtasksContainer.closest(".qt9-lane");
-        
-        // Only collapse if leaving the lane entirely
-        if (lane && !lane.contains(relatedTarget)) {
-          // Check if mouse is still over the timeline area
-          const { rect, minX, maxX } = getBounds();
-          const x = e.clientX - rect.left;
-          if (x < minX || x > maxX) {
-            lane.classList.remove("expanded");
-            if (expandedLane === lane) {
-              expandedLane = null;
-            }
-          }
-        }
-      }
-    }, true);
-
+    // Handlers removed - expansion is now controlled only by lateral mouse position
     subtaskHandlersAttached = true;
   };
 
@@ -672,6 +632,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     card.addEventListener("mouseleave", () => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/5215b819-0085-4d65-a6e9-6b5b576fdca2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:634',message:'Progress line mouseleave',data:{expandedLane:expandedLane?.className||null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
       const { minX } = getBounds();
       // Return to start of week 1 when mouse leaves
       line.style.setProperty("--cursor-x", `${minX}px`);
@@ -698,7 +661,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initial draw + responsive redraw
   renderDeps();
-  window.addEventListener("resize", renderDeps);
+  window.addEventListener("resize", () => {
+    renderDeps();
+    // Recalculate bounds on resize to handle responsive changes
+    // Force a recalculation by triggering a mousemove if mouse is over card
+    const { minX, maxX } = getBounds();
+    if (minX && maxX) {
+      // Bounds will be recalculated on next mousemove
+    }
+  });
   card.addEventListener("mouseenter", start);
   card.addEventListener("mouseleave", stop);
 
@@ -709,37 +680,64 @@ document.addEventListener("DOMContentLoaded", () => {
     const span = maxX - minX;
     const weekWidth = span / currentWeeks;
     const relativeX = x - minX;
-    const weekIndex = Math.floor(relativeX / weekWidth);
+    // Use Math.round for more accurate week detection at boundaries
+    const weekIndex = Math.round(relativeX / weekWidth);
     return Math.max(0, Math.min(currentWeeks - 1, weekIndex));
   };
 
   const getPhaseForWeek = (weekIndex) => {
+    // Find phase that contains this week index (inclusive ranges)
     return phaseConfig.find(
       (phase) =>
         weekIndex >= phase.start && weekIndex < phase.start + phase.span
     );
   };
 
+
   // Throttle mousemove to reduce glitchiness
   let hoverRafId = null;
   let lastPhase = null;
+  let paddingTimeouts = []; // Track padding calculation timeouts to cancel them
 
   const handleMouseMove = (e) => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/5215b819-0085-4d65-a6e9-6b5b576fdca2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:698',message:'handleMouseMove called',data:{clientX:e.clientX,clientY:e.clientY,expandedLane:expandedLane?.className||null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     if (hoverRafId) return; // Skip if already scheduled
 
     hoverRafId = requestAnimationFrame(() => {
       hoverRafId = null;
-      const { rect, minX, maxX, minY, maxY } = getBounds();
+      const { rect, minX, maxX } = getBounds();
       const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
 
-      // Only process if mouse is over the timeline area (not label column, and within vertical bounds)
-      if (x < minX || x > maxX || y < minY || y > maxY) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/5215b819-0085-4d65-a6e9-6b5b576fdca2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:707',message:'Bounds check',data:{x:x,minX:minX,maxX:maxX,isOutside:x<minX||x>maxX,expandedLane:expandedLane?.className||null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+
+      // Only process if mouse is over the timeline area (not label column)
+      if (x < minX || x > maxX) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/5215b819-0085-4d65-a6e9-6b5b576fdca2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:710',message:'Mouse outside bounds - collapsing',data:{expandedLane:expandedLane?.className||null,pendingTimeouts:paddingTimeouts.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
         if (expandedLane) {
+          // Cancel any pending padding calculations
+          paddingTimeouts.forEach(timeout => clearTimeout(timeout));
+          paddingTimeouts = [];
           expandedLane.classList.remove("expanded");
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/5215b819-0085-4d65-a6e9-6b5b576fdca2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:712',message:'Removed expanded class',data:{laneHasExpanded:expandedLane.classList.contains('expanded')},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
+          // #endregion
           expandedLane = null;
           activePhase = null;
           lastPhase = null;
+          // Remove margin-bottom from any expanded row when no lane is expanded
+          const allRows = card.querySelectorAll(".qt9-row");
+          allRows.forEach(row => {
+            row.style.marginBottom = "";
+          });
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/5215b819-0085-4d65-a6e9-6b5b576fdca2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:717',message:'Reset row margins',data:{rowsReset:allRows.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
+          // #endregion
           // Remove hover state from all bars and chips
           phaseConfig.forEach((p) => {
             if (p.bar) p.bar.classList.remove("hovered");
@@ -757,20 +755,120 @@ document.addEventListener("DOMContentLoaded", () => {
         initPhaseConfig();
       }
       
+      // Get phase from X coordinate (week position) - simple lateral scrubbing
       const phase = getPhaseForWeek(weekIndex);
+
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/5215b819-0085-4d65-a6e9-6b5b576fdca2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:736',message:'Phase detection',data:{weekIndex:weekIndex,phaseFound:!!phase,phaseStart:phase?.start,phaseSpan:phase?.span,lastPhase:lastPhase?.start,expandedLane:expandedLane?.className||null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
 
       // Only update if phase changed
       if (phase === lastPhase) return;
       lastPhase = phase;
 
-      if (phase) {
-        // Update expanded lane
-        if (expandedLane !== phase.lane) {
-          if (expandedLane) {
-            expandedLane.classList.remove("expanded");
+      if (phase && phase.lane) {
+        // Update expanded lane - collapse previous, expand new
+        if (expandedLane && expandedLane !== phase.lane) {
+          // Cancel pending margin calculations for previous phase
+          paddingTimeouts.forEach(timeout => clearTimeout(timeout));
+          paddingTimeouts = [];
+          expandedLane.classList.remove("expanded");
+          // Immediately reset margin-bottom on the previous row when switching phases
+          const previousRow = expandedLane.closest(".qt9-row");
+          if (previousRow) {
+            previousRow.style.marginBottom = "";
           }
-          phase.lane.classList.add("expanded");
-          expandedLane = phase.lane;
+        }
+        
+        // Expand the phase lane that matches the week range
+        phase.lane.classList.add("expanded");
+        expandedLane = phase.lane;
+        
+        // #region agent log
+        const subtasksCheck = phase.lane.querySelector(".qt9-subtasks");
+        const computedStyle = window.getComputedStyle(subtasksCheck || document.body);
+        fetch('http://127.0.0.1:7242/ingest/5215b819-0085-4d65-a6e9-6b5b576fdca2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:750',message:'Lane expanded',data:{laneHasExpanded:phase.lane.classList.contains('expanded'),subtasksExists:!!subtasksCheck,subtasksVisibility:subtasksCheck?computedStyle.visibility:null,subtasksOpacity:subtasksCheck?computedStyle.opacity:null,subtasksHeight:subtasksCheck?computedStyle.height:null,subtasksDisplay:subtasksCheck?computedStyle.display:null,phaseStart:phase.start},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'D'})}).catch(()=>{});
+        // #endregion
+        
+        // Update the row containing the expanded lane to create space directly under it
+        const expandedRow = expandedLane.closest(".qt9-row");
+        if (expandedRow && expandedLane) {
+          const subtasks = expandedLane.querySelector(".qt9-subtasks");
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/5215b819-0085-4d65-a6e9-6b5b576fdca2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:753',message:'Checking subtasks',data:{subtasksExists:!!subtasks,subtasksClasses:subtasks?.className||null,subtasksVisibility:subtasks?.style.visibility||'not-set',subtasksHeight:subtasks?.offsetHeight||0,subtasksInnerHTML:subtasks?.innerHTML.length||0,phaseStart:phase.start},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'E'})}).catch(()=>{});
+          // #endregion
+          if (subtasks) {
+            // Cancel any pending padding calculations from previous phase
+            paddingTimeouts.forEach(timeout => clearTimeout(timeout));
+            paddingTimeouts = [];
+            
+            // Store reference to current phase and row for validation
+            const currentPhaseRef = phase;
+            const currentRowRef = expandedRow;
+            
+            // Calculate margin-bottom for the row to create space directly under the expanded phase
+            const calculateRowMargin = () => {
+              // Only calculate if this lane is still expanded and matches current phase
+              if (!expandedLane || !expandedLane.classList.contains("expanded") || expandedLane !== currentPhaseRef.lane) {
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/5215b819-0085-4d65-a6e9-6b5b576fdca2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:790',message:'Skipping margin calc - lane no longer expanded',data:{expandedLane:expandedLane?.className||null,phaseLane:currentPhaseRef.lane?.className||null,phaseStart:currentPhaseRef.start},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'E'})}).catch(()=>{});
+                // #endregion
+                return;
+              }
+              
+              // Ensure subtasks are visible for measurement
+              const wasHidden = subtasks.style.visibility === 'hidden';
+              if (wasHidden) {
+                subtasks.style.visibility = 'visible';
+                subtasks.style.height = 'auto';
+                subtasks.style.opacity = '1';
+              }
+              
+              // Force a reflow to get accurate measurements
+              void subtasks.offsetHeight;
+              
+              // Use multiple methods to get accurate height
+              const scrollHeight = subtasks.scrollHeight;
+              const offsetHeight = subtasks.offsetHeight;
+              const clientHeight = subtasks.clientHeight;
+              
+              // #region agent log
+              fetch('http://127.0.0.1:7242/ingest/5215b819-0085-4d65-a6e9-6b5b576fdca2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:776',message:'Subtask height calculation',data:{scrollHeight:scrollHeight,offsetHeight:offsetHeight,clientHeight:clientHeight,computedHeight:Math.max(scrollHeight,offsetHeight,clientHeight,100),hasExpandedClass:expandedLane?.classList.contains('expanded'),currentPhase:currentPhaseRef.start},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'E'})}).catch(()=>{});
+              // #endregion
+              
+              // Use the largest value to ensure full visibility
+              const subtasksHeight = Math.max(scrollHeight, offsetHeight, clientHeight, 100);
+              
+              // Add extra margin for spacing (10px gap + 20px buffer)
+              const marginBottom = Math.max(subtasksHeight + 30, 150);
+              
+              // Apply margin-bottom to the row containing the expanded lane
+              // This creates space directly under the expanded phase
+              currentRowRef.style.marginBottom = `${marginBottom}px`;
+              
+              // #region agent log
+              fetch('http://127.0.0.1:7242/ingest/5215b819-0085-4d65-a6e9-6b5b576fdca2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:780',message:'Row margin set',data:{marginBottom:marginBottom,subtasksHeight:subtasksHeight,rowMarginBottom:currentRowRef.style.marginBottom,currentPhase:currentPhaseRef.start},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'E'})}).catch(()=>{});
+              // #endregion
+              
+              // Restore original visibility if it was hidden
+              if (wasHidden) {
+                subtasks.style.visibility = '';
+                subtasks.style.height = '';
+                subtasks.style.opacity = '';
+              }
+            };
+            
+            // Set initial margin immediately
+            requestAnimationFrame(() => {
+              calculateRowMargin();
+              // Refine after content renders
+              const timeout1 = setTimeout(calculateRowMargin, 50);
+              paddingTimeouts.push(timeout1);
+              // Final refinement after transition completes
+              const timeout2 = setTimeout(calculateRowMargin, 450);
+              paddingTimeouts.push(timeout2);
+            });
+          }
         }
 
         // Update bar and chip hover states
@@ -792,9 +890,17 @@ document.addEventListener("DOMContentLoaded", () => {
           activePhase = phase;
         }
       } else {
-        // No phase for this week
+        // No phase for this week - collapse if expanded
         if (expandedLane) {
+          // Cancel any pending margin calculations
+          paddingTimeouts.forEach(timeout => clearTimeout(timeout));
+          paddingTimeouts = [];
           expandedLane.classList.remove("expanded");
+          // Reset margin-bottom on the row when collapsing
+          const previousRow = expandedLane.closest(".qt9-row");
+          if (previousRow) {
+            previousRow.style.marginBottom = "";
+          }
           expandedLane = null;
         }
         phaseConfig.forEach((p) => {
@@ -807,31 +913,50 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const handleMouseLeave = (e) => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/5215b819-0085-4d65-a6e9-6b5b576fdca2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:874',message:'handleMouseLeave called',data:{relatedTarget:e.relatedTarget?.tagName||null,expandedLane:expandedLane?.className||null,pendingTimeouts:paddingTimeouts.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     // Cancel any pending animation frame
     if (hoverRafId) {
       cancelAnimationFrame(hoverRafId);
       hoverRafId = null;
     }
 
-    // Only collapse if mouse is leaving the card area (not moving to subtasks)
-    const relatedTarget = e.relatedTarget;
-    const subtasks = card.querySelectorAll(".qt9-subtasks");
-    const isMovingToSubtasks = Array.from(subtasks).some(
-      (subtask) => subtask.contains(relatedTarget)
-    );
+    // Cancel all pending margin calculations
+    paddingTimeouts.forEach(timeout => clearTimeout(timeout));
+    paddingTimeouts = [];
 
-    if (!card.contains(relatedTarget) && !isMovingToSubtasks) {
-      if (expandedLane) {
-        expandedLane.classList.remove("expanded");
-        expandedLane = null;
-      }
-      phaseConfig.forEach((p) => {
-        if (p.bar) p.bar.classList.remove("hovered");
-        if (p.chip) p.chip.classList.remove("active");
-      });
-      activePhase = null;
-      lastPhase = null;
-    }
+    // Collapse all expanded lanes and reset to normal spacing
+    // Reset margin-bottom on all rows
+    const allRows = card.querySelectorAll(".qt9-row");
+    allRows.forEach(row => {
+      row.style.marginBottom = "";
+    });
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/5215b819-0085-4d65-a6e9-6b5b576fdca2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:882',message:'Reset row margins in mouseleave',data:{rowsReset:allRows.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    
+    // Collapse all lanes
+    const allLanes = card.querySelectorAll(".qt9-lane.expanded");
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/5215b819-0085-4d65-a6e9-6b5b576fdca2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:886',message:'Found expanded lanes',data:{expandedLaneCount:allLanes.length,expandedLane:expandedLane?.className||null},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    allLanes.forEach((lane) => {
+      lane.classList.remove("expanded");
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/5215b819-0085-4d65-a6e9-6b5b576fdca2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.js:889',message:'Removed expanded from lane',data:{laneStillHasExpanded:lane.classList.contains('expanded')},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+    });
+    
+    expandedLane = null;
+    activePhase = null;
+    lastPhase = null;
+    
+    // Remove hover state from all bars and chips
+    phaseConfig.forEach((p) => {
+      if (p.bar) p.bar.classList.remove("hovered");
+      if (p.chip) p.chip.classList.remove("active");
+    });
   };
 
   // Initial attachment of subtask handlers

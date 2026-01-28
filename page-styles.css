@@ -805,6 +805,7 @@ body {
 .qt9-timeline-section .qt9-timeline-card {
   width: 100%;
   max-width: 100%;
+  overflow: visible;
 }
 
 /* Responsive */
@@ -937,6 +938,7 @@ body {
   .qt9-timeline-section .qt9-timeline-card {
     width: 100%;
     max-width: 100%;
+    overflow: visible;
   }
 
   .qt9-proof-grid {
