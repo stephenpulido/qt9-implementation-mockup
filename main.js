@@ -347,12 +347,20 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const rect = card.getBoundingClientRect();
     
-    // Check if we're at the smallest breakpoint where rows stack vertically
-    // At this breakpoint, label-col is 0px and timeline expands to full width
-    const isStackedLayout = labelCol === 0 || (labelCol < 50 && colGap === 0);
+    // Use the timeline ruler (qt9-ticks) element's bounds for detection area
+    // This automatically follows the same CSS grid rules that position the ruler correctly
+    const ticksElement = card.querySelector(".qt9-ticks");
+    if (ticksElement) {
+      const ticksRect = ticksElement.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      // Calculate position relative to card - ticks element spans the correct timeline area
+      const minX = ticksRect.left - cardRect.left;
+      const maxX = ticksRect.right - cardRect.left;
+      return { rect, minX, maxX, labelCol, colGap, pad };
+    }
     
-    // At smallest breakpoint, timeline expands to full width (no label column)
-    const minX = isStackedLayout ? pad : pad + labelCol + colGap;
+    // Fallback: use CSS variables if ticks element not found
+    const minX = pad + labelCol + colGap;
     const maxX = rect.width - pad;
     
     return { rect, minX, maxX, labelCol, colGap, pad };
@@ -643,32 +651,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Render once, then keep arrows glued to the bars even while bars translate on hover.
   let rafId = null;
+  let stopTimeout = null;
   const loop = () => {
-    renderDeps();
+    if (renderDeps) {
+      renderDeps();
+    }
     rafId = requestAnimationFrame(loop);
   };
 
   // Always visible, always tracking: run loop while pointer is over the card.
   const start = () => {
+    // Clear any pending stop timeout
+    if (stopTimeout) {
+      clearTimeout(stopTimeout);
+      stopTimeout = null;
+    }
     if (rafId == null) rafId = requestAnimationFrame(loop);
   };
   const stop = () => {
-    if (rafId != null) {
-      cancelAnimationFrame(rafId);
-      rafId = null;
+    // Don't stop immediately - continue updating for the duration of the bar transition
+    // This ensures arrows match the final position after bars finish animating
+    if (stopTimeout) {
+      clearTimeout(stopTimeout);
     }
+    // Bar transitions are 380ms, continue for slightly longer to catch the end
+    stopTimeout = setTimeout(() => {
+      if (rafId != null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      // Final render to ensure arrows are in correct position
+      if (renderDeps) {
+        renderDeps();
+      }
+      stopTimeout = null;
+    }, 450); // Slightly longer than the 380ms transition + buffer
   };
 
   // Initial draw + responsive redraw
   renderDeps();
   window.addEventListener("resize", () => {
     renderDeps();
-    // Recalculate bounds on resize to handle responsive changes
-    // Force a recalculation by triggering a mousemove if mouse is over card
-    const { minX, maxX } = getBounds();
-    if (minX && maxX) {
-      // Bounds will be recalculated on next mousemove
-    }
   });
   card.addEventListener("mouseenter", start);
   card.addEventListener("mouseleave", stop);
